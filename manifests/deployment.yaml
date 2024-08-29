@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins47
+  namespace: jenkins1
+  labels:
+    name: jenkins47
+    app: jenkins47
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins47
+  template:
+    metadata:
+      labels:
+        app: jenkins47
+        name: jenkins47
+      name: jenkins47
+    spec:
+      serviceAccountName: jenkins47
+      containers:
+      - name: jenkins47
+        env:
+        - name: JAVA_OPTS
+          value: -Xmx2048m -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85
+        image: jenkins/jenkins:lts-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8090
+          protocol: TCP
+        - containerPort: 50010
+          protocol: TCP
+        resources:
+          limits:
+           cpu: "1"
+           memory: 1Gi
+          requests:
+           cpu: "1"
+           memory: 1Gi
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: jenkins-pvc47
