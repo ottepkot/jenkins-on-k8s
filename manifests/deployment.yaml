@@ -11,6 +11,11 @@ spec:
   selector:
     matchLabels:
       app: jenkins47
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -24,24 +29,34 @@ spec:
         env:
         - name: JAVA_OPTS
           value: -Xmx2048m -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85
-        image: jenkins/jenkins:lts-alpine
+        - name: TZ
+          value: "Etc/GMT-3"
+        image: jenkins/jenkins:2.387.2-alpine
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8090
+        - containerPort: 8080
           protocol: TCP
-        - containerPort: 50010
+        - containerPort: 50000
           protocol: TCP
         resources:
           limits:
            cpu: "1"
-           memory: 1Gi
+           memory: "2Gi"
           requests:
-           cpu: "1"
-           memory: 1Gi
+           cpu: "500m"
+           memory: "1500Mi"
         volumeMounts:
         - name: jenkins-home
           mountPath: /var/jenkins_home
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 3000
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
       volumes:
       - name: jenkins-home
         persistentVolumeClaim:
           claimName: jenkins-pvc47
+      terminationGracePeriodSeconds: 30
